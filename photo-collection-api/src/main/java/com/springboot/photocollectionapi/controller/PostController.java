@@ -4,12 +4,16 @@ import com.springboot.photocollectionapi.config.AppConstants;
 import com.springboot.photocollectionapi.dto.PostDto;
 import com.springboot.photocollectionapi.dto.PostResponse;
 import com.springboot.photocollectionapi.exception.ApiResponse;
+import com.springboot.photocollectionapi.service.FileService;
 import com.springboot.photocollectionapi.service.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 @RestController
 @RequestMapping("/api")
@@ -18,6 +22,10 @@ public class PostController {
     @Autowired
     private PostService postService;
 
+    @Autowired
+    private FileService fileService;
+    @Value("${project.image}")
+    private String path;
     // create
     @PostMapping("/user/{userId}/category/{categoryId}/posts")
     public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto, @PathVariable Integer userId, @PathVariable Integer categoryId){
@@ -80,6 +88,19 @@ public class PostController {
     public ResponseEntity<List<PostDto>> searchPostByTitle (@PathVariable String keyword){
         List<PostDto> searchResult = postService.searchPosts(keyword);
         return new ResponseEntity<List<PostDto>>(searchResult, HttpStatus.OK);
+
+    }
+
+    // image uploads
+    @PostMapping("/post/image/upload/{postId}")
+    public ResponseEntity<PostDto> uploadImage(@PathVariable Integer postId, @RequestParam MultipartFile image) throws IOException {
+        PostDto postDto = postService.getPostById(postId);
+
+        String fileName = fileService.uploadImage(path, image);
+        postDto.setImageName(fileName);
+        PostDto updatePost = postService.updatePost(postDto, postId);
+
+        return new ResponseEntity<PostDto>(updatePost, HttpStatus.OK);
 
     }
 }

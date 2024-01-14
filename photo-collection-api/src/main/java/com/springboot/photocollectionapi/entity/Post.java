@@ -21,6 +21,8 @@ public class Post {
 
     private String imageDescription;
 
+    private String imageName;
+
     public Date addeddate;
 
     // relationship mapping

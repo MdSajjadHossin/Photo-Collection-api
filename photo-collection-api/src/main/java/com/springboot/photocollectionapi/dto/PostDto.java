@@ -15,6 +15,8 @@ public class PostDto {
 
     private String imageDescription;
 
+    private String imageName;
+
     private Date addedDate;
 
     private CategoryDto category;
